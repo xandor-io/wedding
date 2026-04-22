@@ -9,6 +9,7 @@
     --cream: #efe7d5;
     --sage-deep: #4b5a3f;
     --sage: #7c8a6a;
+    --sage-text: #5c6b4a; /* darker sage for text (WCAG AA ~5.3:1 on ivory) */
     --sage-soft: #a9b59a;
     --blush: #e4c7bc;
     --blush-soft: #f0dcd2;
@@ -63,7 +64,327 @@
     font-size: 0.72rem;
     letter-spacing: 0.32em;
     text-transform: uppercase;
-    color: var(--sage);
+    color: var(--sage-text);
     font-weight: 400;
+  }
+
+  /* ══════════════════════════════════════════════════════════════
+     Form pages (/rsvp, /update) — card layout shared across pages
+     Kept in globals so Next.js SSRs them reliably, no FOUC.
+     ══════════════════════════════════════════════════════════════ */
+  .wrap {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 3rem 1.5rem;
+    background: radial-gradient(ellipse at center, rgba(228, 199, 188, 0.2), transparent 70%), var(--ivory);
+  }
+  .card {
+    max-width: 520px;
+    width: 100%;
+    padding: 4rem 3rem;
+    background: var(--ivory-warm);
+    border: 1px solid rgba(124, 138, 106, 0.25);
+    box-shadow: 0 30px 80px -40px rgba(43, 42, 37, 0.3);
+    text-align: center;
+    position: relative;
+  }
+  .card .ornament {
+    color: var(--blush-rose);
+    width: 80px;
+    margin: 0 auto 1.5rem;
+  }
+  .card h1 {
+    font-family: "Fraunces", serif;
+    font-style: italic;
+    font-weight: 300;
+    font-size: 2.3rem;
+    color: var(--ink);
+    line-height: 1.1;
+    margin: 0 0 1.25rem;
+  }
+  .card .intro {
+    font-family: "Fraunces", serif;
+    font-weight: 300;
+    color: var(--ink-soft);
+    font-size: 1rem;
+    line-height: 1.7;
+    margin: 0 0 1rem;
+  }
+  .card .note {
+    font-family: "Fraunces", serif;
+    font-style: italic;
+    font-weight: 300;
+    color: var(--sage-text);
+    font-size: 0.9rem;
+    line-height: 1.6;
+    margin: 0 0 2.25rem;
+  }
+  .card .signoff {
+    font-family: "Pinyon Script", cursive;
+    color: var(--blush-rose);
+    font-size: 1.6rem;
+    margin: 2rem 0;
+  }
+
+  /* Links + buttons inside cards */
+  .card .back-link {
+    display: block;
+    width: fit-content;
+    margin: 1.5rem auto 0;
+    font-family: "Jost", sans-serif;
+    font-size: 0.75rem;
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+    color: var(--sage-text);
+    text-decoration: none;
+  }
+  .card .back-link:hover {
+    color: var(--blush-rose);
+  }
+  .card .back-link-button {
+    display: block;
+    width: fit-content;
+    margin: 1.5rem auto 0;
+    font-family: "Jost", sans-serif;
+    font-size: 0.75rem;
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+    color: var(--sage-text);
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    padding: 0;
+  }
+  .card .back-link-button:hover {
+    color: var(--blush-rose);
+  }
+  .card .update-link {
+    display: block;
+    width: fit-content;
+    margin: 1.75rem auto 0;
+    font-family: "Jost", sans-serif;
+    font-size: 0.72rem;
+    letter-spacing: 0.25em;
+    text-transform: uppercase;
+    color: var(--sage-deep);
+    text-decoration: none;
+    border-bottom: 1px solid var(--sage);
+    padding-bottom: 2px;
+  }
+  .card .update-link:hover {
+    color: var(--blush-rose);
+    border-color: var(--blush-rose);
+  }
+  .card .alt-link {
+    display: block;
+    width: fit-content;
+    margin: 1.75rem auto 0;
+    font-family: "Jost", sans-serif;
+    font-size: 0.72rem;
+    letter-spacing: 0.25em;
+    text-transform: uppercase;
+    color: var(--sage-deep);
+    text-decoration: none;
+    border-bottom: 1px solid var(--sage);
+    padding-bottom: 2px;
+  }
+  .card .alt-link:hover {
+    color: var(--blush-rose);
+    border-color: var(--blush-rose);
+  }
+  .card .btn-secondary {
+    display: inline-block;
+    margin-top: 1.5rem;
+    font-family: "Jost", sans-serif;
+    font-size: 0.8rem;
+    letter-spacing: 0.4em;
+    text-transform: uppercase;
+    color: var(--sage-deep);
+    text-decoration: none;
+    border-bottom: 1px solid var(--sage-deep);
+    padding-bottom: 2px;
+  }
+  .card .btn-secondary:hover {
+    color: var(--blush-rose);
+    border-color: var(--blush-rose);
+  }
+  .card .btn-primary {
+    display: inline-flex;
+    align-items: center;
+    font-family: "Jost", sans-serif;
+    font-size: 0.8rem;
+    font-weight: 400;
+    letter-spacing: 0.4em;
+    text-transform: uppercase;
+    color: var(--ivory);
+    background: var(--sage-deep);
+    padding: 1.1rem 2rem;
+    text-decoration: none;
+    border: none;
+    cursor: pointer;
+    transition: all 0.4s cubic-bezier(0.22, 1, 0.36, 1);
+    margin-top: 0.5rem;
+  }
+  .card .btn-primary:hover {
+    background: var(--blush-rose);
+    letter-spacing: 0.45em;
+  }
+
+  /* Inline lookup form on /update (single email input + button) */
+  .lookup-form {
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+    text-align: left;
+  }
+  .lookup-form label {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+  .lookup-form label span {
+    font-family: "Jost", sans-serif;
+    font-size: 0.7rem;
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+    color: var(--sage-text);
+  }
+  .lookup-form input {
+    font-family: "Jost", sans-serif;
+    font-size: 0.95rem;
+    padding: 0.85rem 1rem;
+    background: var(--ivory);
+    border: 1px solid rgba(124, 138, 106, 0.35);
+    color: var(--ink);
+    outline: none;
+    transition: border-color 0.2s;
+    font-weight: 300;
+  }
+  .lookup-form input:focus {
+    border-color: var(--blush-rose);
+  }
+  .lookup-form .error {
+    font-family: "Fraunces", serif;
+    font-style: italic;
+    font-size: 0.9rem;
+    color: var(--blush-rose);
+  }
+  .lookup-form button {
+    font-family: "Jost", sans-serif;
+    font-size: 0.8rem;
+    font-weight: 400;
+    letter-spacing: 0.4em;
+    text-transform: uppercase;
+    color: var(--ivory);
+    background: var(--sage-deep);
+    padding: 1.1rem 2rem;
+    border: none;
+    cursor: pointer;
+    transition: all 0.4s cubic-bezier(0.22, 1, 0.36, 1);
+    margin-top: 0.75rem;
+  }
+  .lookup-form button:hover:not(:disabled) {
+    background: var(--blush-rose);
+    letter-spacing: 0.45em;
+  }
+  .lookup-form button:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
+
+  /* ══════════════════════════════════════════════════════════════
+     Guest details form (shared by /rsvp and /update)
+     ══════════════════════════════════════════════════════════════ */
+  .guest-form {
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+    text-align: left;
+  }
+  .guest-form label {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+  .guest-form label span {
+    font-family: "Jost", sans-serif;
+    font-size: 0.7rem;
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+    color: var(--sage-text);
+  }
+  .guest-form .optional {
+    font-style: italic;
+    letter-spacing: 0;
+    text-transform: none;
+    font-size: 0.75rem;
+    opacity: 0.7;
+    font-family: "Fraunces", serif;
+    margin-left: 0.25rem;
+  }
+  .guest-form input,
+  .guest-form textarea {
+    font-family: "Jost", sans-serif;
+    font-size: 0.95rem;
+    padding: 0.85rem 1rem;
+    background: var(--ivory);
+    border: 1px solid rgba(124, 138, 106, 0.35);
+    color: var(--ink);
+    outline: none;
+    transition: border-color 0.2s;
+    font-weight: 300;
+  }
+  .guest-form textarea {
+    resize: vertical;
+    min-height: 80px;
+  }
+  .guest-form input:focus,
+  .guest-form textarea:focus {
+    border-color: var(--blush-rose);
+  }
+  .guest-form input:disabled,
+  .guest-form input[readonly] {
+    background: rgba(124, 138, 106, 0.06);
+    cursor: not-allowed;
+    color: var(--ink-soft);
+  }
+  .guest-form .error {
+    font-family: "Fraunces", serif;
+    font-style: italic;
+    font-size: 0.9rem;
+    color: var(--blush-rose);
+  }
+  .guest-form button {
+    font-family: "Jost", sans-serif;
+    font-size: 0.8rem;
+    font-weight: 400;
+    letter-spacing: 0.4em;
+    text-transform: uppercase;
+    color: var(--ivory);
+    background: var(--sage-deep);
+    padding: 1.1rem 2rem;
+    border: none;
+    cursor: pointer;
+    transition: all 0.4s cubic-bezier(0.22, 1, 0.36, 1);
+    margin-top: 0.75rem;
+  }
+  .guest-form button:hover:not(:disabled) {
+    background: var(--blush-rose);
+    letter-spacing: 0.45em;
+  }
+  .guest-form button:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
+
+  @media (max-width: 480px) {
+    .card {
+      padding: 3rem 1.75rem;
+    }
+    .card h1 {
+      font-size: 2rem;
+    }
   }
 }

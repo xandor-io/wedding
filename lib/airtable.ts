@@ -57,6 +57,40 @@ export async function createGuest(
   return mapRecord(rec);
 }
 
+/**
+ * Upsert by email. If a guest with this email exists, update the editable
+ * fields (name, phone, address). NEVER touches Status or Notes — those are
+ * for Elexus to manage in Airtable.
+ * If no match, creates a new guest with status "info_submitted".
+ */
+export async function upsertGuestByEmail(
+  input: Omit<GuestRecord, "id" | "createdAt" | "status" | "notes">
+): Promise<{ guest: GuestRecord; created: boolean }> {
+  const existing = await findGuestByEmail(input.email);
+  if (existing) {
+    const base = getBase();
+    const updated = await base(tableName()).update([
+      {
+        id: existing.id,
+        fields: {
+          Name: input.name,
+          Phone: input.phone || "",
+          Address: input.address || "",
+        },
+      },
+    ]);
+    return { guest: mapRecord(updated[0]), created: false };
+  }
+  const guest = await createGuest({
+    name: input.name,
+    email: input.email,
+    phone: input.phone,
+    address: input.address,
+    status: "info_submitted",
+  });
+  return { guest, created: true };
+}
+
 export async function listGuests(): Promise<GuestRecord[]> {
   const base = getBase();
   const records = await base(tableName())

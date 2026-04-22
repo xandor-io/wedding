@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { createGuest } from "@/lib/airtable";
+import { upsertGuestByEmail } from "@/lib/airtable";
 
 export async function POST(req: NextRequest) {
   try {
@@ -16,8 +16,14 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Please enter a valid email address." }, { status: 400 });
     }
 
-    await createGuest({ name, email, phone, address, status: "info_submitted" });
-    return NextResponse.json({ ok: true });
+    const result = await upsertGuestByEmail({
+      name,
+      email,
+      phone,
+      address,
+    });
+
+    return NextResponse.json({ ok: true, created: result.created });
   } catch (err) {
     console.error("RSVP error:", err);
     return NextResponse.json(

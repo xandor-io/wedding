@@ -4,6 +4,35 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 
 export default function Landing() {
+  const [loaderState, setLoaderState] = useState<"visible" | "fading" | "hidden">("visible");
+  const [fontsReady, setFontsReady] = useState(false);
+
+  useEffect(() => {
+    let cancelled = false;
+    const markReady = () => {
+      if (!cancelled) setFontsReady(true);
+    };
+    if (typeof document !== "undefined" && "fonts" in document) {
+      document.fonts.ready.then(markReady);
+    }
+    // Safety net: if fonts don't report ready within 2.5s, show anyway
+    const safetyTimeout = setTimeout(markReady, 2500);
+    return () => {
+      cancelled = true;
+      clearTimeout(safetyTimeout);
+    };
+  }, []);
+
+  useEffect(() => {
+    if (!fontsReady) return;
+    const fade = setTimeout(() => setLoaderState("fading"), 1600);
+    const unmount = setTimeout(() => setLoaderState("hidden"), 2400);
+    return () => {
+      clearTimeout(fade);
+      clearTimeout(unmount);
+    };
+  }, [fontsReady]);
+
   const [countdown, setCountdown] = useState({
     days: "—",
     hours: "—",
@@ -54,6 +83,32 @@ export default function Landing() {
 
   return (
     <main>
+      {loaderState !== "hidden" && (
+        <div
+          className={`loader${loaderState === "fading" ? " fade-out" : ""}`}
+          style={{
+            position: "fixed",
+            inset: 0,
+            zIndex: 9999,
+            background: "#F6F1E6",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            opacity: loaderState === "fading" ? 0 : 1,
+            pointerEvents: loaderState === "fading" ? "none" : "auto",
+            transition: "opacity 0.8s cubic-bezier(0.22, 1, 0.36, 1)",
+          }}
+        >
+          {fontsReady && (
+            <div className="loader-monogram">
+              <span className="loader-initial loader-initial-left">E</span>
+              <span className="loader-amp">&amp;</span>
+              <span className="loader-initial loader-initial-right">X</span>
+            </div>
+          )}
+        </div>
+      )}
+
       {/* ═══════════════ HERO ═══════════════ */}
       <section className="hero">
         <div className="hero-bg-wash" />
@@ -101,10 +156,10 @@ export default function Landing() {
           <div className="plain-date">
             Twenty-fifth of April · Two Thousand Twenty-Seven
           </div>
-          <div className="location-block">
-            <div className="venue">Convento de Santa Clara</div>
-            <div className="city">Antigua · Guatemala</div>
-          </div>
+          <Link href="/rsvp" className="hero-cta">
+            Share your details
+            <span className="hero-cta-arrow">→</span>
+          </Link>
         </div>
 
         <div className="scroll-hint">
@@ -246,92 +301,18 @@ export default function Landing() {
         <div className="small">More details to come</div>
       </footer>
 
-      <style jsx>{landingStyles}</style>
-    </main>
-  );
-}
+      <style jsx global>{`
+  /* ══════════ Loader ══════════ */
+  .loader { position: fixed; inset: 0; z-index: 9999; background: var(--ivory); display: flex; align-items: center; justify-content: center; transition: opacity 0.8s cubic-bezier(0.22, 1, 0.36, 1); }
+  .loader.fade-out { opacity: 0; pointer-events: none; }
+  .loader-monogram { display: flex; align-items: center; gap: 0.3rem; font-family: 'Pinyon Script', cursive; color: var(--blush-rose); line-height: 1; }
+  .loader-initial { font-size: clamp(3rem, 8vw, 5rem); opacity: 0; transform: translateY(10px); animation: loader-initial-in 0.9s cubic-bezier(0.22, 1, 0.36, 1) forwards; }
+  .loader-initial-left { animation-delay: 0.4s; }
+  .loader-initial-right { animation-delay: 0.55s; }
+  .loader-amp { font-size: clamp(4.5rem, 12vw, 7.5rem); opacity: 0; transform: scale(0.5) rotate(-10deg); animation: loader-amp-bloom 1.1s cubic-bezier(0.34, 1.56, 0.64, 1) 0.1s forwards; }
+  @keyframes loader-initial-in { to { opacity: 1; transform: translateY(0); } }
+  @keyframes loader-amp-bloom { to { opacity: 1; transform: scale(1) rotate(-4deg); } }
 
-// ═══════════════════════════════════════════════════════════════
-// Sub-components
-// ═══════════════════════════════════════════════════════════════
-
-function OliveBranch() {
-  return (
-    <svg viewBox="0 0 200 200" fill="none" stroke="#7C8A6A" strokeWidth="1.4">
-      <path d="M 20 180 Q 60 140, 100 120 T 180 40" strokeLinecap="round" />
-      {[
-        { cx: 50, cy: 155, r: 12, ry: 4, rot: -30, fill: "#A9B59A", op: 0.8 },
-        { cx: 70, cy: 140, r: 14, ry: 5, rot: -20, fill: "#7C8A6A", op: 0.85 },
-        { cx: 95, cy: 120, r: 13, ry: 4, rot: -15, fill: "#A9B59A", op: 0.8 },
-        { cx: 120, cy: 95, r: 15, ry: 5, rot: -25, fill: "#7C8A6A", op: 0.85 },
-        { cx: 145, cy: 70, r: 12, ry: 4, rot: -35, fill: "#A9B59A", op: 0.75 },
-        { cx: 165, cy: 50, r: 10, ry: 3.5, rot: -40, fill: "#7C8A6A", op: 0.7 },
-        { cx: 40, cy: 168, r: 10, ry: 3.5, rot: 30, fill: "#7C8A6A", op: 0.7 },
-        { cx: 60, cy: 150, r: 11, ry: 4, rot: 40, fill: "#A9B59A", op: 0.7 },
-        { cx: 85, cy: 128, r: 12, ry: 4, rot: 35, fill: "#7C8A6A", op: 0.75 },
-        { cx: 108, cy: 108, r: 11, ry: 4, rot: 30, fill: "#A9B59A", op: 0.7 },
-        { cx: 130, cy: 82, r: 10, ry: 3.5, rot: 25, fill: "#7C8A6A", op: 0.7 },
-      ].map((e, i) => (
-        <ellipse
-          key={i}
-          cx={e.cx}
-          cy={e.cy}
-          rx={e.r}
-          ry={e.ry}
-          transform={`rotate(${e.rot} ${e.cx} ${e.cy})`}
-          fill={e.fill}
-          stroke="none"
-          opacity={e.op}
-        />
-      ))}
-    </svg>
-  );
-}
-
-function LittleFloral() {
-  return (
-    <svg viewBox="0 0 100 100" fill="none" stroke="#C9918B" strokeWidth="1">
-      <path d="M 50 80 Q 50 60, 50 40" strokeLinecap="round" />
-      <circle cx="50" cy="30" r="8" fill="#E4C7BC" stroke="#C9918B" opacity="0.7" />
-      <circle cx="42" cy="38" r="6" fill="#F0DCD2" stroke="#C9918B" opacity="0.6" />
-      <circle cx="58" cy="38" r="6" fill="#F0DCD2" stroke="#C9918B" opacity="0.6" />
-      <circle cx="50" cy="22" r="6" fill="#F0DCD2" stroke="#C9918B" opacity="0.6" />
-      <circle cx="50" cy="32" r="3" fill="#C9918B" stroke="none" />
-    </svg>
-  );
-}
-
-function Polaroid({ index, caption }: { index: number; caption: string }) {
-  return (
-    <div className={`polaroid polaroid-${index}`}>
-      <div className="polaroid-inner">
-        <div className="polaroid-photo">
-          <div className="polaroid-placeholder">
-            <svg
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="1.5"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            >
-              <path d="M 23 19 a 2 2 0 0 1 -2 2 H 3 a 2 2 0 0 1 -2 -2 V 8 a 2 2 0 0 1 2 -2 h 4 l 2 -3 h 6 l 2 3 h 4 a 2 2 0 0 1 2 2 z" />
-              <circle cx="12" cy="13" r="4" />
-            </svg>
-            <div className="polaroid-placeholder-text">your photo</div>
-          </div>
-        </div>
-        <div className="polaroid-caption">{caption}</div>
-      </div>
-    </div>
-  );
-}
-
-// ═══════════════════════════════════════════════════════════════
-// Styles (ported from the approved HTML prototype)
-// ═══════════════════════════════════════════════════════════════
-
-const landingStyles = `
   .hero { min-height: 100vh; display: flex; align-items: center; justify-content: center; position: relative; padding: 4rem 2rem; overflow: hidden; }
   .hero-bg-wash { position: absolute; inset: 0; background: radial-gradient(ellipse 80% 60% at 70% 20%, rgba(232,201,192,0.3), transparent 60%), radial-gradient(ellipse 70% 50% at 20% 80%, rgba(169,181,154,0.25), transparent 60%), radial-gradient(ellipse 60% 40% at 50% 50%, rgba(250,246,236,0.6), transparent 70%); z-index: 0; }
   .botanical { position: absolute; z-index: 1; opacity: 0; animation: botanical-appear 2.4s cubic-bezier(0.22,1,0.36,1) 0.3s forwards; }
@@ -384,12 +365,14 @@ const landingStyles = `
   .hero-divider .dot { width: 6px; height: 6px; border-radius: 50%; background: var(--blush-rose); }
   .roman-date { font-family: 'Fraunces', serif; font-style: italic; font-weight: 400; font-size: clamp(1.1rem, 2.5vw, 1.6rem); letter-spacing: 0.3em; color: var(--sage-deep); opacity: 0; transform: translateY(20px); animation: rise 1.2s cubic-bezier(0.22,1,0.36,1) 1.7s forwards; }
   .plain-date { font-family: 'Jost', sans-serif; font-weight: 300; font-size: clamp(0.85rem, 1.5vw, 1rem); letter-spacing: 0.4em; text-transform: uppercase; color: var(--ink-soft); margin-top: 0.75rem; opacity: 0; animation: rise 1.2s cubic-bezier(0.22,1,0.36,1) 1.9s forwards; }
-  .location-block { margin-top: 3rem; opacity: 0; animation: rise 1.2s cubic-bezier(0.22,1,0.36,1) 2.2s forwards; }
-  .location-block .venue { font-family: 'Fraunces', serif; font-style: italic; font-weight: 400; font-size: clamp(1.3rem, 2.8vw, 1.9rem); color: var(--ink); }
-  .location-block .city { font-family: 'Jost', sans-serif; font-weight: 300; font-size: 0.8rem; letter-spacing: 0.4em; text-transform: uppercase; color: var(--sage); margin-top: 0.6rem; }
+  .hero-cta { display: inline-flex; align-items: center; gap: 0.9rem; margin-top: 3rem; font-family: 'Jost', sans-serif; font-size: 0.72rem; font-weight: 400; letter-spacing: 0.35em; text-transform: uppercase; color: var(--ivory); background: var(--sage-deep); padding: 1.1rem 2rem; text-decoration: none; opacity: 0; transform: translateY(20px); animation: rise 1.2s cubic-bezier(0.22,1,0.36,1) 2.2s forwards; transition: background 0.4s ease, letter-spacing 0.3s ease; }
+  .hero-cta:hover { background: var(--blush-rose); letter-spacing: 0.4em; }
+  .hero-cta-arrow { display: inline-block; transition: transform 0.3s ease; }
+  .hero-cta:hover .hero-cta-arrow { transform: translateX(4px); }
 
-  .scroll-hint { position: absolute; bottom: 3rem; left: 50%; transform: translateX(-50%); font-family: 'Jost', sans-serif; font-size: 0.7rem; letter-spacing: 0.4em; text-transform: uppercase; color: var(--sage); opacity: 0; animation: rise 1.2s cubic-bezier(0.22,1,0.36,1) 2.6s forwards; }
+  .scroll-hint { position: absolute; bottom: 3rem; left: 50%; transform: translateX(-50%); font-family: 'Jost', sans-serif; font-size: 0.7rem; letter-spacing: 0.4em; text-transform: uppercase; color: var(--sage-text); opacity: 0; animation: rise-scroll 1.2s cubic-bezier(0.22,1,0.36,1) 2.6s forwards; }
   .scroll-hint .arrow { display: block; width: 1px; height: 40px; background: var(--sage); margin: 1rem auto 0; animation: scroll-pulse 2.2s ease-in-out infinite; transform-origin: top; }
+  @keyframes rise-scroll { to { opacity: 1; transform: translateX(-50%) translateY(0); } }
   @keyframes scroll-pulse { 0%, 100% { transform: scaleY(0.3); opacity: 0.4; } 50% { transform: scaleY(1); opacity: 1; } }
 
   :global(section) { padding: 8rem 2rem; position: relative; }
@@ -432,7 +415,7 @@ const landingStyles = `
   .destination-text h2 { font-family: 'Fraunces', serif; font-weight: 300; font-style: italic; font-size: clamp(2.5rem, 5vw, 4rem); line-height: 1.05; color: var(--ink); margin-bottom: 2rem; }
   .destination-text p { font-family: 'Fraunces', serif; font-weight: 300; font-size: 1.1rem; line-height: 1.8; color: var(--ink-soft); margin-bottom: 1.5rem; }
   .destination-text .venue-name { font-family: 'Pinyon Script', cursive; font-size: 2rem; color: var(--blush-rose); margin: 2rem 0 0.5rem; display: block; }
-  .destination-text .venue-sub { font-family: 'Jost', sans-serif; font-size: 0.75rem; letter-spacing: 0.3em; text-transform: uppercase; color: var(--sage); }
+  .destination-text .venue-sub { font-family: 'Jost', sans-serif; font-size: 0.75rem; letter-spacing: 0.3em; text-transform: uppercase; color: var(--sage-text); }
 
   .destination-visual { aspect-ratio: 4/3; position: relative; border: 1px solid rgba(124,138,106,0.3); overflow: hidden; }
   .destination-visual .destination-photo { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: center 55%; filter: saturate(0.82) contrast(1.02) brightness(0.98); animation: photo-drift 28s ease-in-out infinite alternate; }
@@ -451,7 +434,7 @@ const landingStyles = `
 
   footer { text-align: center; padding: 6rem 2rem 4rem; background: var(--ivory); border-top: 1px solid rgba(124,138,106,0.15); }
   footer .sign-off { font-family: 'Pinyon Script', cursive; font-size: clamp(2.5rem, 5vw, 3.5rem); color: var(--blush-rose); line-height: 1; margin-bottom: 1.5rem; }
-  footer .small { font-family: 'Jost', sans-serif; font-size: 0.72rem; letter-spacing: 0.4em; text-transform: uppercase; color: var(--sage); }
+  footer .small { font-family: 'Jost', sans-serif; font-size: 0.72rem; letter-spacing: 0.4em; text-transform: uppercase; color: var(--sage-text); }
 
   @keyframes float { 0%, 100% { transform: translateY(0) rotate(0deg); } 50% { transform: translateY(-12px) rotate(2deg); } }
   .float { animation: float 8s ease-in-out infinite; }
@@ -460,12 +443,14 @@ const landingStyles = `
   /* Hide polaroids on desktop narrow, they'll be repositioned on mobile */
   @media (max-width: 900px) {
     .polaroid { display: none; }
+    .hero { padding: 4rem 2rem 10rem; }
   }
 
   /* Mobile */
   @media (max-width: 700px) {
     :global(section) { padding: 4.5rem 1.25rem; }
-    .hero { padding: 3rem 1.25rem 7.5rem; }
+    .hero { padding: 4rem 1.25rem 7.5rem; align-items: flex-start; }
+    .save-script { font-size: 2.75rem; }
     .invitation { padding: 5.5rem 1.25rem; }
     .countdown { padding: 4.5rem 1.25rem; }
     .destination { padding: 5rem 1.25rem; }
@@ -476,6 +461,8 @@ const landingStyles = `
     .botanical-br { width: 180px; bottom: -1rem; right: -1.5rem; }
     .botanical-tr, .botanical-bl { display: none; }
 
+    .hero-cta { margin-top: 2.5rem; }
+
     .letter { padding: 3.5rem 1.5rem; }
     .letter-corner { width: 32px; height: 32px; }
     .letter-corner.tl, .letter-corner.tr { top: 14px; }
@@ -484,26 +471,105 @@ const landingStyles = `
     .letter-corner.tr, .letter-corner.br { right: 14px; }
 
     .destination-inner { gap: 2.5rem; }
-    .scroll-hint { bottom: 1.5rem; }
-    .scroll-hint .arrow { height: 28px; }
+    .scroll-hint { display: none; }
 
     .polaroid { display: block; position: absolute; top: auto; left: 50%; right: auto; bottom: 1.5rem; animation: none; opacity: 1; }
-    .polaroid-1 { transform: translateX(calc(-50% - 98px)) rotate(-9deg); animation: polaroid-mobile-1 1.2s cubic-bezier(0.22,1,0.36,1) 2.3s backwards; }
+    .polaroid-1 { transform: translateX(calc(-50% - 125px)) rotate(-9deg); animation: polaroid-mobile-1 1.2s cubic-bezier(0.22,1,0.36,1) 2.3s backwards; }
     .polaroid-2 { transform: translateX(-50%) rotate(2deg); z-index: 3; animation: polaroid-mobile-2 1.2s cubic-bezier(0.22,1,0.36,1) 2.55s backwards; }
-    .polaroid-3 { transform: translateX(calc(-50% + 98px)) rotate(7deg); animation: polaroid-mobile-3 1.2s cubic-bezier(0.22,1,0.36,1) 2.8s backwards; }
-    @keyframes polaroid-mobile-1 { from { opacity: 0; transform: translateX(calc(-50% - 98px)) translateY(20px) rotate(-9deg) scale(0.9); } to { opacity: 1; transform: translateX(calc(-50% - 98px)) translateY(0) rotate(-9deg) scale(1); } }
+    .polaroid-3 { transform: translateX(calc(-50% + 125px)) rotate(7deg); animation: polaroid-mobile-3 1.2s cubic-bezier(0.22,1,0.36,1) 2.8s backwards; }
+    @keyframes polaroid-mobile-1 { from { opacity: 0; transform: translateX(calc(-50% - 125px)) translateY(20px) rotate(-9deg) scale(0.9); } to { opacity: 1; transform: translateX(calc(-50% - 125px)) translateY(0) rotate(-9deg) scale(1); } }
     @keyframes polaroid-mobile-2 { from { opacity: 0; transform: translateX(-50%) translateY(20px) rotate(2deg) scale(0.9); } to { opacity: 1; transform: translateX(-50%) translateY(0) rotate(2deg) scale(1); } }
-    @keyframes polaroid-mobile-3 { from { opacity: 0; transform: translateX(calc(-50% + 98px)) translateY(20px) rotate(7deg) scale(0.9); } to { opacity: 1; transform: translateX(calc(-50% + 98px)) translateY(0) rotate(7deg) scale(1); } }
-    .polaroid-inner { padding: 0.55rem 0.55rem 1.4rem 0.55rem; }
-    .polaroid-photo { width: 96px; height: 112px; }
+    @keyframes polaroid-mobile-3 { from { opacity: 0; transform: translateX(calc(-50% + 125px)) translateY(20px) rotate(7deg) scale(0.9); } to { opacity: 1; transform: translateX(calc(-50% + 125px)) translateY(0) rotate(7deg) scale(1); } }
+    .polaroid-inner { padding: 0.7rem 0.7rem 1.7rem 0.7rem; }
+    .polaroid-photo { width: 145px; height: 170px; }
     .polaroid-placeholder :global(svg) { width: 22px; height: 22px; margin-bottom: 0.35rem; }
     .polaroid-placeholder-text { font-size: 0.55rem; letter-spacing: 0.2em; }
     .polaroid-caption { font-size: 1.15rem; margin-top: 0.3rem; }
   }
 
   @media (max-width: 360px) {
-    .polaroid-photo { width: 82px; height: 96px; }
-    .polaroid-1 { transform: translateX(calc(-50% - 86px)) rotate(-9deg); }
-    .polaroid-3 { transform: translateX(calc(-50% + 86px)) rotate(7deg); }
+    .polaroid-photo { width: 120px; height: 140px; }
+    .polaroid-1 { transform: translateX(calc(-50% - 105px)) rotate(-9deg); }
+    .polaroid-3 { transform: translateX(calc(-50% + 105px)) rotate(7deg); }
   }
-`;
+`}</style>
+    </main>
+  );
+}
+
+// ═══════════════════════════════════════════════════════════════
+// Sub-components
+// ═══════════════════════════════════════════════════════════════
+
+function OliveBranch() {
+  return (
+    <svg width="200" height="200" viewBox="0 0 200 200" fill="none" stroke="#7C8A6A" strokeWidth="1.4">
+      <path d="M 20 180 Q 60 140, 100 120 T 180 40" strokeLinecap="round" />
+      {[
+        { cx: 50, cy: 155, r: 12, ry: 4, rot: -30, fill: "#A9B59A", op: 0.8 },
+        { cx: 70, cy: 140, r: 14, ry: 5, rot: -20, fill: "#7C8A6A", op: 0.85 },
+        { cx: 95, cy: 120, r: 13, ry: 4, rot: -15, fill: "#A9B59A", op: 0.8 },
+        { cx: 120, cy: 95, r: 15, ry: 5, rot: -25, fill: "#7C8A6A", op: 0.85 },
+        { cx: 145, cy: 70, r: 12, ry: 4, rot: -35, fill: "#A9B59A", op: 0.75 },
+        { cx: 165, cy: 50, r: 10, ry: 3.5, rot: -40, fill: "#7C8A6A", op: 0.7 },
+        { cx: 40, cy: 168, r: 10, ry: 3.5, rot: 30, fill: "#7C8A6A", op: 0.7 },
+        { cx: 60, cy: 150, r: 11, ry: 4, rot: 40, fill: "#A9B59A", op: 0.7 },
+        { cx: 85, cy: 128, r: 12, ry: 4, rot: 35, fill: "#7C8A6A", op: 0.75 },
+        { cx: 108, cy: 108, r: 11, ry: 4, rot: 30, fill: "#A9B59A", op: 0.7 },
+        { cx: 130, cy: 82, r: 10, ry: 3.5, rot: 25, fill: "#7C8A6A", op: 0.7 },
+      ].map((e, i) => (
+        <ellipse
+          key={i}
+          cx={e.cx}
+          cy={e.cy}
+          rx={e.r}
+          ry={e.ry}
+          transform={`rotate(${e.rot} ${e.cx} ${e.cy})`}
+          fill={e.fill}
+          stroke="none"
+          opacity={e.op}
+        />
+      ))}
+    </svg>
+  );
+}
+
+function LittleFloral() {
+  return (
+    <svg width="100" height="100" viewBox="0 0 100 100" fill="none" stroke="#C9918B" strokeWidth="1">
+      <path d="M 50 80 Q 50 60, 50 40" strokeLinecap="round" />
+      <circle cx="50" cy="30" r="8" fill="#E4C7BC" stroke="#C9918B" opacity="0.7" />
+      <circle cx="42" cy="38" r="6" fill="#F0DCD2" stroke="#C9918B" opacity="0.6" />
+      <circle cx="58" cy="38" r="6" fill="#F0DCD2" stroke="#C9918B" opacity="0.6" />
+      <circle cx="50" cy="22" r="6" fill="#F0DCD2" stroke="#C9918B" opacity="0.6" />
+      <circle cx="50" cy="32" r="3" fill="#C9918B" stroke="none" />
+    </svg>
+  );
+}
+
+function Polaroid({ index, caption }: { index: number; caption: string }) {
+  return (
+    <div className={`polaroid polaroid-${index}`}>
+      <div className="polaroid-inner">
+        <div className="polaroid-photo">
+          <div className="polaroid-placeholder">
+            <svg
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="1.5"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
+              <path d="M 23 19 a 2 2 0 0 1 -2 2 H 3 a 2 2 0 0 1 -2 -2 V 8 a 2 2 0 0 1 2 -2 h 4 l 2 -3 h 6 l 2 3 h 4 a 2 2 0 0 1 2 2 z" />
+              <circle cx="12" cy="13" r="4" />
+            </svg>
+            <div className="polaroid-placeholder-text">your photo</div>
+          </div>
+        </div>
+        <div className="polaroid-caption">{caption}</div>
+      </div>
+    </div>
+  );
+}
+
