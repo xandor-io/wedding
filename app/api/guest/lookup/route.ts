@@ -1,10 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
 import { findGuestByEmail } from "@/lib/airtable";
+import { isValidEmail } from "@/lib/validation";
 
 export async function GET(req: NextRequest) {
   try {
     const email = (req.nextUrl.searchParams.get("email") || "").trim();
-    if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+    if (!email || !isValidEmail(email)) {
       return NextResponse.json({ error: "Valid email required." }, { status: 400 });
     }
     const guest = await findGuestByEmail(email);

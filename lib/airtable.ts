@@ -103,9 +103,15 @@ export async function findGuestByEmail(
   email: string
 ): Promise<GuestRecord | null> {
   const base = getBase();
+  // Defense in depth: callers (API routes) already validate against EMAIL_RE,
+  // but strip anything outside the email charset here too so a future caller
+  // that forgets to validate can't inject into the filterByFormula string.
+  // Airtable formulas have no documented single-quote escape, so our only
+  // safe move is to ensure the value can never contain one.
+  const safe = email.toLowerCase().replace(/[^a-z0-9._%+\-@]/g, "");
   const records = await base(tableName())
     .select({
-      filterByFormula: `LOWER({Email}) = '${email.toLowerCase().replace(/'/g, "\\'")}'`,
+      filterByFormula: `LOWER({Email}) = '${safe}'`,
       maxRecords: 1,
     })
     .firstPage();

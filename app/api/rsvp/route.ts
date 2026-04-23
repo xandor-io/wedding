@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { upsertGuestByEmail } from "@/lib/airtable";
+import { isValidEmail } from "@/lib/validation";
 
 export async function POST(req: NextRequest) {
   try {
@@ -12,7 +13,7 @@ export async function POST(req: NextRequest) {
     if (!name || !email) {
       return NextResponse.json({ error: "Name and email are required." }, { status: 400 });
     }
-    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+    if (!isValidEmail(email)) {
       return NextResponse.json({ error: "Please enter a valid email address." }, { status: 400 });
     }
 

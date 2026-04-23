@@ -10,6 +10,16 @@ export const metadata: Metadata = {
     type: "website",
   },
   icons: { icon: "/favicon.ico" },
+  // Belt-and-suspenders with /robots.ts — some crawlers honor meta over robots.txt.
+  robots: {
+    index: false,
+    follow: false,
+    nocache: true,
+    googleBot: {
+      index: false,
+      follow: false,
+    },
+  },
 };
 
 export default function RootLayout({
