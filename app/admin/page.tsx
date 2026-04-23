@@ -7,6 +7,10 @@ import type { GuestRecord } from "@/lib/airtable";
 export default function AdminOverview() {
   const [guests, setGuests] = useState<GuestRecord[] | null>(null);
   const [error, setError] = useState("");
+  // Capture "now" once on mount so render logic stays pure under React 19's
+  // purity rules. Close enough for the "last 24 hours" dashboard stat — the
+  // counter doesn't need to tick in realtime.
+  const [mountNow] = useState(() => Date.now());
 
   useEffect(() => {
     fetch("/api/admin/guests")
@@ -20,7 +24,7 @@ export default function AdminOverview() {
   const withAddress = guests?.filter((g) => g.address).length ?? 0;
   const last24h = guests?.filter((g) => {
     if (!g.createdAt) return false;
-    return Date.now() - new Date(g.createdAt).getTime() < 86_400_000;
+    return mountNow - new Date(g.createdAt).getTime() < 86_400_000;
   }).length ?? 0;
 
   return (

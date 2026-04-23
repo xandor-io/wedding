@@ -3,9 +3,16 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 
+const PHOTOS = [
+  { src: "/photos/the-beginning.jpg", caption: "The beginning" },
+  { src: "/photos/proposal.jpg", caption: "Proposal" },
+  { src: "/photos/us.jpg", caption: "Us" },
+];
+
 export default function Landing() {
   const [loaderState, setLoaderState] = useState<"visible" | "fading" | "hidden">("visible");
   const [fontsReady, setFontsReady] = useState(false);
+  const [openPhotoIndex, setOpenPhotoIndex] = useState<number | null>(null);
 
   useEffect(() => {
     let cancelled = false;
@@ -83,6 +90,24 @@ export default function Landing() {
 
   return (
     <main>
+      {openPhotoIndex !== null && (
+        <PhotoViewer
+          photos={PHOTOS}
+          index={openPhotoIndex}
+          onClose={() => setOpenPhotoIndex(null)}
+          onPrev={() =>
+            setOpenPhotoIndex((prev) =>
+              prev === null ? null : (prev - 1 + PHOTOS.length) % PHOTOS.length
+            )
+          }
+          onNext={() =>
+            setOpenPhotoIndex((prev) =>
+              prev === null ? null : (prev + 1) % PHOTOS.length
+            )
+          }
+        />
+      )}
+
       {loaderState !== "hidden" && (
         <div
           className={`loader${loaderState === "fading" ? " fade-out" : ""}`}
@@ -128,9 +153,15 @@ export default function Landing() {
         </div>
 
         {/* Polaroids */}
-        <Polaroid index={1} caption="Us" />
-        <Polaroid index={2} caption="Our story" />
-        <Polaroid index={3} caption="Together" />
+        {PHOTOS.map((p, i) => (
+          <Polaroid
+            key={p.src}
+            index={i + 1}
+            caption={p.caption}
+            src={p.src}
+            onClick={() => setOpenPhotoIndex(i)}
+          />
+        ))}
 
         <div className="hero-content">
           <div className="save-script">Save the Date</div>
@@ -152,7 +183,7 @@ export default function Landing() {
             <span className="dot" />
             <span className="line" />
           </div>
-          <div className="roman-date">XXV · IV · MMXXVII</div>
+          <div className="hero-date">25 · 04 · 2027</div>
           <div className="plain-date">
             Twenty-fifth of April · Two Thousand Twenty-Seven
           </div>
@@ -313,6 +344,28 @@ export default function Landing() {
   @keyframes loader-initial-in { to { opacity: 1; transform: translateY(0); } }
   @keyframes loader-amp-bloom { to { opacity: 1; transform: scale(1) rotate(-4deg); } }
 
+  /* ══════════ Photo Viewer (lightbox) ══════════ */
+  .photo-viewer { position: fixed; inset: 0; z-index: 10000; background: rgba(43, 42, 37, 0.88); display: flex; align-items: center; justify-content: center; padding: 5rem 3.5rem; cursor: pointer; animation: viewer-fade-in 0.35s ease-out both; }
+  @keyframes viewer-fade-in { from { opacity: 0; } to { opacity: 1; } }
+  .photo-viewer-stage { position: relative; max-width: 92vw; max-height: 82vh; display: flex; flex-direction: column; align-items: center; cursor: default; animation: viewer-stage-in 0.45s cubic-bezier(0.22, 1, 0.36, 1) both; }
+  @keyframes viewer-stage-in { from { opacity: 0; transform: scale(0.92); } to { opacity: 1; transform: scale(1); } }
+  .photo-viewer-img { max-width: 92vw; max-height: 75vh; object-fit: contain; background: #fff; padding: 0.6rem 0.6rem 2.5rem; box-shadow: 0 30px 80px -20px rgba(0, 0, 0, 0.65); display: block; }
+  .photo-viewer-caption { margin-top: 1.5rem; font-family: 'Pinyon Script', cursive; color: var(--ivory); font-size: clamp(1.6rem, 3vw, 2.2rem); line-height: 1; text-shadow: 0 2px 20px rgba(0, 0, 0, 0.4); }
+  .photo-viewer-close, .photo-viewer-nav { position: absolute; background: rgba(250, 246, 236, 0.08); border: 1px solid rgba(250, 246, 236, 0.3); border-radius: 50%; color: var(--ivory); cursor: pointer; display: flex; align-items: center; justify-content: center; transition: background 0.3s ease, border-color 0.3s ease, transform 0.3s ease; font-family: 'Jost', sans-serif; line-height: 1; padding: 0; }
+  .photo-viewer-close:hover, .photo-viewer-nav:hover { background: rgba(250, 246, 236, 0.18); border-color: var(--ivory); }
+  .photo-viewer-close { top: 1.5rem; right: 1.5rem; width: 44px; height: 44px; font-size: 1.5rem; }
+  .photo-viewer-nav { top: 50%; transform: translateY(-50%); width: 52px; height: 52px; font-size: 2rem; font-weight: 300; }
+  .photo-viewer-nav:hover { transform: translateY(-50%) scale(1.05); }
+  .photo-viewer-prev { left: 1.5rem; }
+  .photo-viewer-next { right: 1.5rem; }
+
+  @media (max-width: 700px) {
+    .photo-viewer { padding: 4rem 1rem; }
+    .photo-viewer-img { max-height: 72vh; }
+    .photo-viewer-nav { display: none; }
+    .photo-viewer-close { top: 30px; right: 30px; width: 40px; height: 40px; }
+  }
+
   .hero { min-height: 100vh; display: flex; align-items: center; justify-content: center; position: relative; padding: 4rem 2rem; overflow: hidden; }
   .hero-bg-wash { position: absolute; inset: 0; background: radial-gradient(ellipse 80% 60% at 70% 20%, rgba(232,201,192,0.3), transparent 60%), radial-gradient(ellipse 70% 50% at 20% 80%, rgba(169,181,154,0.25), transparent 60%), radial-gradient(ellipse 60% 40% at 50% 50%, rgba(250,246,236,0.6), transparent 70%); z-index: 0; }
   .botanical { position: absolute; z-index: 1; opacity: 0; animation: botanical-appear 2.4s cubic-bezier(0.22,1,0.36,1) 0.3s forwards; }
@@ -325,14 +378,15 @@ export default function Landing() {
   @keyframes draw { to { stroke-dashoffset: 0; } }
 
   /* Polaroids */
-  .polaroid { position: absolute; z-index: 2; opacity: 0; transform-origin: center center; pointer-events: none; }
+  .polaroid { position: absolute; z-index: 2; opacity: 0; transform-origin: center center; background: transparent; border: none; padding: 0; margin: 0; cursor: pointer; font: inherit; color: inherit; }
+  .polaroid:focus-visible { outline: 2px solid var(--blush-rose); outline-offset: 6px; }
   .polaroid-1 { top: 16%; left: 4%; animation: polaroid-in-1 1.4s cubic-bezier(0.22,1,0.36,1) 2.3s forwards; }
   .polaroid-2 { top: 46%; right: 4%; animation: polaroid-in-2 1.4s cubic-bezier(0.22,1,0.36,1) 2.6s forwards; }
   .polaroid-3 { bottom: 14%; left: 8%; animation: polaroid-in-3 1.4s cubic-bezier(0.22,1,0.36,1) 2.9s forwards; }
   @keyframes polaroid-in-1 { from { opacity: 0; transform: rotate(-8deg) translateY(30px) scale(0.88); } to { opacity: 1; transform: rotate(-8deg) translateY(0) scale(1); } }
   @keyframes polaroid-in-2 { from { opacity: 0; transform: rotate(7deg) translateY(30px) scale(0.88); } to { opacity: 1; transform: rotate(7deg) translateY(0) scale(1); } }
   @keyframes polaroid-in-3 { from { opacity: 0; transform: rotate(4deg) translateY(30px) scale(0.88); } to { opacity: 1; transform: rotate(4deg) translateY(0) scale(1); } }
-  .polaroid-inner { background: #FAF6EC; padding: 0.75rem 0.75rem 1.9rem 0.75rem; box-shadow: 0 18px 40px -12px rgba(43,42,37,0.35), 0 3px 10px rgba(43,42,37,0.12); animation: polaroid-float 7s ease-in-out infinite; }
+  .polaroid-inner { background: #FFFFFF; padding: 0.75rem 0.75rem 1.9rem 0.75rem; box-shadow: 0 18px 40px -12px rgba(43,42,37,0.35), 0 3px 10px rgba(43,42,37,0.12); animation: polaroid-float 7s ease-in-out infinite; }
   .polaroid-1 .polaroid-inner { animation-delay: -1s; }
   .polaroid-2 .polaroid-inner { animation-delay: -3s; animation-duration: 8.5s; }
   .polaroid-3 .polaroid-inner { animation-delay: -2.2s; animation-duration: 6.5s; }
@@ -341,6 +395,7 @@ export default function Landing() {
   .polaroid-1 .polaroid-photo { background: linear-gradient(135deg, #E4C7BC 0%, #C9918B 100%); }
   .polaroid-2 .polaroid-photo { background: linear-gradient(135deg, #A9B59A 0%, #7C8A6A 100%); }
   .polaroid-3 .polaroid-photo { background: linear-gradient(135deg, #F0DCD2 0%, #C9918B 100%); }
+  .polaroid-img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: center; display: block; }
   .polaroid-placeholder { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; color: rgba(250,246,236,0.7); }
   .polaroid-placeholder :global(svg) { width: 28px; height: 28px; opacity: 0.75; margin-bottom: 0.5rem; }
   .polaroid-placeholder-text { font-family: 'Fraunces', serif; font-style: italic; font-size: 0.62rem; letter-spacing: 0.25em; text-transform: uppercase; opacity: 0.9; }
@@ -363,7 +418,7 @@ export default function Landing() {
   .hero-divider { display: flex; align-items: center; justify-content: center; gap: 1.5rem; margin: 3rem 0 2rem; opacity: 0; animation: rise 1.2s cubic-bezier(0.22,1,0.36,1) 1.6s forwards; }
   .hero-divider .line { height: 1px; width: 60px; background: var(--sage); opacity: 0.6; }
   .hero-divider .dot { width: 6px; height: 6px; border-radius: 50%; background: var(--blush-rose); }
-  .roman-date { font-family: 'Fraunces', serif; font-style: italic; font-weight: 400; font-size: clamp(1.1rem, 2.5vw, 1.6rem); letter-spacing: 0.3em; color: var(--sage-deep); opacity: 0; transform: translateY(20px); animation: rise 1.2s cubic-bezier(0.22,1,0.36,1) 1.7s forwards; }
+  .hero-date { font-family: 'Fraunces', serif; font-style: italic; font-weight: 400; font-size: clamp(1.1rem, 2.5vw, 1.6rem); letter-spacing: 0.3em; color: var(--sage-deep); opacity: 0; transform: translateY(20px); animation: rise 1.2s cubic-bezier(0.22,1,0.36,1) 1.7s forwards; }
   .plain-date { font-family: 'Jost', sans-serif; font-weight: 300; font-size: clamp(0.85rem, 1.5vw, 1rem); letter-spacing: 0.4em; text-transform: uppercase; color: var(--ink-soft); margin-top: 0.75rem; opacity: 0; animation: rise 1.2s cubic-bezier(0.22,1,0.36,1) 1.9s forwards; }
   .hero-cta { display: inline-flex; align-items: center; gap: 0.9rem; margin-top: 3rem; font-family: 'Jost', sans-serif; font-size: 0.72rem; font-weight: 400; letter-spacing: 0.35em; text-transform: uppercase; color: var(--ivory); background: var(--sage-deep); padding: 1.1rem 2rem; text-decoration: none; opacity: 0; transform: translateY(20px); animation: rise 1.2s cubic-bezier(0.22,1,0.36,1) 2.2s forwards; transition: background 0.4s ease, letter-spacing 0.3s ease; }
   .hero-cta:hover { background: var(--blush-rose); letter-spacing: 0.4em; }
@@ -547,28 +602,120 @@ function LittleFloral() {
   );
 }
 
-function Polaroid({ index, caption }: { index: number; caption: string }) {
+function Polaroid({
+  index,
+  caption,
+  src,
+  onClick,
+}: {
+  index: number;
+  caption: string;
+  src?: string;
+  onClick?: () => void;
+}) {
   return (
-    <div className={`polaroid polaroid-${index}`}>
+    <button
+      type="button"
+      className={`polaroid polaroid-${index}`}
+      onClick={onClick}
+      aria-label={`View ${caption} photo larger`}
+    >
       <div className="polaroid-inner">
         <div className="polaroid-photo">
-          <div className="polaroid-placeholder">
-            <svg
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="1.5"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            >
-              <path d="M 23 19 a 2 2 0 0 1 -2 2 H 3 a 2 2 0 0 1 -2 -2 V 8 a 2 2 0 0 1 2 -2 h 4 l 2 -3 h 6 l 2 3 h 4 a 2 2 0 0 1 2 2 z" />
-              <circle cx="12" cy="13" r="4" />
-            </svg>
-            <div className="polaroid-placeholder-text">your photo</div>
-          </div>
+          {src ? (
+            <img src={src} alt={caption} className="polaroid-img" />
+          ) : (
+            <div className="polaroid-placeholder">
+              <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="1.5"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              >
+                <path d="M 23 19 a 2 2 0 0 1 -2 2 H 3 a 2 2 0 0 1 -2 -2 V 8 a 2 2 0 0 1 2 -2 h 4 l 2 -3 h 6 l 2 3 h 4 a 2 2 0 0 1 2 2 z" />
+                <circle cx="12" cy="13" r="4" />
+              </svg>
+              <div className="polaroid-placeholder-text">your photo</div>
+            </div>
+          )}
         </div>
         <div className="polaroid-caption">{caption}</div>
       </div>
+    </button>
+  );
+}
+
+function PhotoViewer({
+  photos,
+  index,
+  onClose,
+  onPrev,
+  onNext,
+}: {
+  photos: { src: string; caption: string }[];
+  index: number;
+  onClose: () => void;
+  onPrev: () => void;
+  onNext: () => void;
+}) {
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") onClose();
+      else if (e.key === "ArrowLeft") onPrev();
+      else if (e.key === "ArrowRight") onNext();
+    };
+    window.addEventListener("keydown", onKey);
+    // Prevent background scroll while viewer is open
+    const prevOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => {
+      window.removeEventListener("keydown", onKey);
+      document.body.style.overflow = prevOverflow;
+    };
+  }, [onClose, onPrev, onNext]);
+
+  const photo = photos[index];
+  return (
+    <div className="photo-viewer" onClick={onClose} role="dialog" aria-modal="true">
+      <button
+        type="button"
+        className="photo-viewer-close"
+        onClick={onClose}
+        aria-label="Close"
+      >
+        ×
+      </button>
+      <button
+        type="button"
+        className="photo-viewer-nav photo-viewer-prev"
+        onClick={(e) => {
+          e.stopPropagation();
+          onPrev();
+        }}
+        aria-label="Previous photo"
+      >
+        ‹
+      </button>
+      <div
+        className="photo-viewer-stage"
+        onClick={(e) => e.stopPropagation()}
+      >
+        <img src={photo.src} alt={photo.caption} className="photo-viewer-img" />
+        <div className="photo-viewer-caption">{photo.caption}</div>
+      </div>
+      <button
+        type="button"
+        className="photo-viewer-nav photo-viewer-next"
+        onClick={(e) => {
+          e.stopPropagation();
+          onNext();
+        }}
+        aria-label="Next photo"
+      >
+        ›
+      </button>
     </div>
   );
 }
