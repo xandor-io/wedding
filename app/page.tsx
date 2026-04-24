@@ -4,9 +4,9 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 
 const PHOTOS = [
-  { src: "/photos/the-beginning.jpg", caption: "The beginning" },
-  { src: "/photos/proposal.jpg", caption: "Proposal" },
-  { src: "/photos/us.jpg", caption: "Us" },
+  { src: "/photos/1.jpg", caption: "A beginning" },
+  { src: "/photos/2.jpg", caption: "A promise" },
+  { src: "/photos/3.jpg", caption: "A forever" },
 ];
 
 export default function Landing() {
@@ -152,17 +152,6 @@ export default function Landing() {
           <LittleFloral />
         </div>
 
-        {/* Polaroids */}
-        {PHOTOS.map((p, i) => (
-          <Polaroid
-            key={p.src}
-            index={i + 1}
-            caption={p.caption}
-            src={p.src}
-            onClick={() => setOpenPhotoIndex(i)}
-          />
-        ))}
-
         <div className="hero-content">
           <div className="save-script">Save the Date</div>
           <h1 className="names">
@@ -196,6 +185,25 @@ export default function Landing() {
         <div className="scroll-hint">
           Scroll
           <span className="arrow" />
+        </div>
+      </section>
+
+      {/* ═══════════════ PHOTO STRIP ═══════════════ */}
+      <section className="photo-strip">
+        <div className="photo-strip-inner">
+          {PHOTOS.map((p, i) => (
+            <div
+              key={p.src}
+              className={`photo-strip-item reveal reveal-delay-${Math.min(i + 1, 3)}`}
+            >
+              <Polaroid
+                index={i + 1}
+                caption={p.caption}
+                src={p.src}
+                onClick={() => setOpenPhotoIndex(i)}
+              />
+            </div>
+          ))}
         </div>
       </section>
 
@@ -360,9 +368,13 @@ export default function Landing() {
   .photo-viewer-next { right: 1.5rem; }
 
   @media (max-width: 700px) {
-    .photo-viewer { padding: 4rem 1rem; }
-    .photo-viewer-img { max-height: 72vh; }
-    .photo-viewer-nav { display: none; }
+    .photo-viewer { padding: 3.5rem 1rem 5.5rem; }
+    .photo-viewer-img { max-height: 65vh; }
+    /* Nav moved to bottom-center on mobile so photo stays large */
+    .photo-viewer-nav { width: 40px; height: 40px; font-size: 1.5rem; top: auto; bottom: 1.5rem; transform: none; }
+    .photo-viewer-nav:hover { transform: none; }
+    .photo-viewer-prev { left: calc(50% - 50px); right: auto; }
+    .photo-viewer-next { left: auto; right: calc(50% - 50px); }
     .photo-viewer-close { top: 30px; right: 30px; width: 40px; height: 40px; }
   }
 
@@ -377,21 +389,18 @@ export default function Landing() {
   @keyframes botanical-appear { to { opacity: 1; } }
   @keyframes draw { to { stroke-dashoffset: 0; } }
 
-  /* Polaroids */
-  .polaroid { position: absolute; z-index: 2; opacity: 0; transform-origin: center center; background: transparent; border: none; padding: 0; margin: 0; cursor: pointer; font: inherit; color: inherit; }
+  /* Polaroids (rendered in the photo-strip section below the hero) */
+  .polaroid { transform-origin: center center; background: transparent; border: none; padding: 0; margin: 0; cursor: pointer; font: inherit; color: inherit; display: inline-block; }
   .polaroid:focus-visible { outline: 2px solid var(--blush-rose); outline-offset: 6px; }
-  .polaroid-1 { top: 16%; left: 4%; animation: polaroid-in-1 1.4s cubic-bezier(0.22,1,0.36,1) 2.3s forwards; }
-  .polaroid-2 { top: 46%; right: 4%; animation: polaroid-in-2 1.4s cubic-bezier(0.22,1,0.36,1) 2.6s forwards; }
-  .polaroid-3 { bottom: 14%; left: 8%; animation: polaroid-in-3 1.4s cubic-bezier(0.22,1,0.36,1) 2.9s forwards; }
-  @keyframes polaroid-in-1 { from { opacity: 0; transform: rotate(-8deg) translateY(30px) scale(0.88); } to { opacity: 1; transform: rotate(-8deg) translateY(0) scale(1); } }
-  @keyframes polaroid-in-2 { from { opacity: 0; transform: rotate(7deg) translateY(30px) scale(0.88); } to { opacity: 1; transform: rotate(7deg) translateY(0) scale(1); } }
-  @keyframes polaroid-in-3 { from { opacity: 0; transform: rotate(4deg) translateY(30px) scale(0.88); } to { opacity: 1; transform: rotate(4deg) translateY(0) scale(1); } }
+  .polaroid-1 { transform: rotate(-5deg); }
+  .polaroid-2 { transform: rotate(3deg); }
+  .polaroid-3 { transform: rotate(-2deg); }
   .polaroid-inner { background: #FFFFFF; padding: 0.75rem 0.75rem 1.9rem 0.75rem; box-shadow: 0 18px 40px -12px rgba(43,42,37,0.35), 0 3px 10px rgba(43,42,37,0.12); animation: polaroid-float 7s ease-in-out infinite; }
   .polaroid-1 .polaroid-inner { animation-delay: -1s; }
   .polaroid-2 .polaroid-inner { animation-delay: -3s; animation-duration: 8.5s; }
   .polaroid-3 .polaroid-inner { animation-delay: -2.2s; animation-duration: 6.5s; }
   @keyframes polaroid-float { 0%, 100% { transform: translateY(0) rotate(0deg); } 50% { transform: translateY(-10px) rotate(0.8deg); } }
-  .polaroid-photo { width: 130px; height: 150px; position: relative; overflow: hidden; }
+  .polaroid-photo { width: 230px; height: 270px; position: relative; overflow: hidden; }
   .polaroid-1 .polaroid-photo { background: linear-gradient(135deg, #E4C7BC 0%, #C9918B 100%); }
   .polaroid-2 .polaroid-photo { background: linear-gradient(135deg, #A9B59A 0%, #7C8A6A 100%); }
   .polaroid-3 .polaroid-photo { background: linear-gradient(135deg, #F0DCD2 0%, #C9918B 100%); }
@@ -431,6 +440,12 @@ export default function Landing() {
   @keyframes scroll-pulse { 0%, 100% { transform: scaleY(0.3); opacity: 0.4; } 50% { transform: scaleY(1); opacity: 1; } }
 
   :global(section) { padding: 8rem 2rem; position: relative; }
+
+  /* Photo strip — three polaroids, centered row on desktop, stacked on mobile */
+  .photo-strip { background: var(--ivory); padding: 7rem 2rem; overflow: hidden; }
+  .photo-strip-inner { max-width: 900px; margin: 0 auto; display: flex; justify-content: center; align-items: center; gap: 2rem; flex-wrap: wrap; }
+  .photo-strip-item { display: inline-flex; }
+
   :global(.reveal) { opacity: 0; transform: translateY(40px); transition: opacity 1.4s cubic-bezier(0.22,1,0.36,1), transform 1.4s cubic-bezier(0.22,1,0.36,1); }
   :global(.reveal.in) { opacity: 1; transform: translateY(0); }
   :global(.reveal-delay-1) { transition-delay: 0.15s; }
@@ -495,12 +510,6 @@ export default function Landing() {
   .float { animation: float 8s ease-in-out infinite; }
   .float-delay { animation-delay: -4s; }
 
-  /* Hide polaroids on desktop narrow, they'll be repositioned on mobile */
-  @media (max-width: 900px) {
-    .polaroid { display: none; }
-    .hero { padding: 4rem 2rem 10rem; }
-  }
-
   /* Mobile */
   @media (max-width: 700px) {
     :global(section) { padding: 4.5rem 1.25rem; }
@@ -528,24 +537,18 @@ export default function Landing() {
     .destination-inner { gap: 2.5rem; }
     .scroll-hint { display: none; }
 
-    .polaroid { display: block; position: absolute; top: auto; left: 50%; right: auto; bottom: 1.5rem; animation: none; opacity: 1; }
-    .polaroid-1 { transform: translateX(calc(-50% - 125px)) rotate(-9deg); animation: polaroid-mobile-1 1.2s cubic-bezier(0.22,1,0.36,1) 2.3s backwards; }
-    .polaroid-2 { transform: translateX(-50%) rotate(2deg); z-index: 3; animation: polaroid-mobile-2 1.2s cubic-bezier(0.22,1,0.36,1) 2.55s backwards; }
-    .polaroid-3 { transform: translateX(calc(-50% + 125px)) rotate(7deg); animation: polaroid-mobile-3 1.2s cubic-bezier(0.22,1,0.36,1) 2.8s backwards; }
-    @keyframes polaroid-mobile-1 { from { opacity: 0; transform: translateX(calc(-50% - 125px)) translateY(20px) rotate(-9deg) scale(0.9); } to { opacity: 1; transform: translateX(calc(-50% - 125px)) translateY(0) rotate(-9deg) scale(1); } }
-    @keyframes polaroid-mobile-2 { from { opacity: 0; transform: translateX(-50%) translateY(20px) rotate(2deg) scale(0.9); } to { opacity: 1; transform: translateX(-50%) translateY(0) rotate(2deg) scale(1); } }
-    @keyframes polaroid-mobile-3 { from { opacity: 0; transform: translateX(calc(-50% + 125px)) translateY(20px) rotate(7deg) scale(0.9); } to { opacity: 1; transform: translateX(calc(-50% + 125px)) translateY(0) rotate(7deg) scale(1); } }
+    /* Photo strip: stack polaroids vertically on mobile, smaller photo */
+    .photo-strip { padding: 4rem 1rem; }
+    .photo-strip-inner { flex-direction: column; gap: 1.75rem; }
     .polaroid-inner { padding: 0.7rem 0.7rem 1.7rem 0.7rem; }
-    .polaroid-photo { width: 145px; height: 170px; }
+    .polaroid-photo { width: 200px; height: 240px; }
     .polaroid-placeholder :global(svg) { width: 22px; height: 22px; margin-bottom: 0.35rem; }
     .polaroid-placeholder-text { font-size: 0.55rem; letter-spacing: 0.2em; }
-    .polaroid-caption { font-size: 1.15rem; margin-top: 0.3rem; }
+    .polaroid-caption { font-size: 1.25rem; margin-top: 0.4rem; }
   }
 
   @media (max-width: 360px) {
-    .polaroid-photo { width: 120px; height: 140px; }
-    .polaroid-1 { transform: translateX(calc(-50% - 105px)) rotate(-9deg); }
-    .polaroid-3 { transform: translateX(calc(-50% + 105px)) rotate(7deg); }
+    .polaroid-photo { width: 170px; height: 200px; }
   }
 `}</style>
     </main>
